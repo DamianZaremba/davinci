@@ -228,6 +228,7 @@ while (!feof($socket)) {
 	else
 		$prefix = null;
 	$source = prefixparse($prefix);
+	$srcnick = $source->nick;
 	$cmd = strtoupper($params[0]);
 
 	switch ($cmd) {
@@ -238,8 +239,13 @@ while (!feof($socket)) {
 	case ERR_NOMOTD:
 		on_register();
 		break;
+	case "INVITE"
+		$target = $params[1];
+		$channel = $params[2];
+		send("JOIN", $channel);
+		send("PRIVMSG", $channel, "\001ACTION waves at $srcnick.\001");
+		break;
 	case "PRIVMSG":
-		$srcnick = $source->nick;
 		$target = $params[1];
 		$message = $params[2];
 		if ($message == "\001VERSION\001") {
