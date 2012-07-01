@@ -24,8 +24,8 @@ if (!$socket) {
 	exit();
 }
 
-fwrite($socket,'USER '.$config['user'].' "1" "1" :'.$config['gecos']."\n");
-fwrite($socket,'NICK '.$config['nick']."\n");
+send($socket, "USER", $config["user"], "1", "1", $config["gecos"]);
+send($socket, "NICK", $config["nick"]);
 
 while (!feof($socket)) {
 	$line = fgets($socket);
