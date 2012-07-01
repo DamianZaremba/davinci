@@ -5,7 +5,7 @@ class Prefix {
 	public $user;
 	public $host;
 
-	public __construct($nick, $user, $host) {
+	public function __construct($nick, $user, $host) {
 		$this->nick = $nick;
 		$this->user = $user;
 		$this->host = $host;
@@ -101,7 +101,7 @@ function user_get_stats($nick) {
 	$tmp = "";
 	foreach ($users[$nick]["log"] as $reason => $count)
 		$tmp .= "$reason: $count. ";
-	return rstrip($tmp);
+	return rtrim($tmp);
 }
 
 function user_get_points($nick) {
@@ -119,7 +119,7 @@ function user_adj_points($nick, $delta, $reason) {
 	$users[$nick]["log"][$reason]++;
 	save_db();
 
-	if ($reason == "Administratively changed") {
+	if ($reason == "Administratively changed")
 		$log = $users[$nick]["vlog"];
 	elseif ($delta > 0)
 		$log = $users[$nick]["verbose"];

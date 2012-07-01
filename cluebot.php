@@ -21,8 +21,8 @@ function on_connect() {
 	if (strlen($config["pass"]))
 		send($socket, "PASS", $config["pass"]);
 
-	send($socket, "USER", $config["user"], "1", "1", $config["gecos"]);
-	send($socket, "NICK", $config["nick"]);
+	send("USER", $config["user"], "1", "1", $config["gecos"]);
+	send("NICK", $config["nick"]);
 }
 
 function on_register() {
@@ -239,7 +239,7 @@ while (!feof($socket)) {
 	case ERR_NOMOTD:
 		on_register();
 		break;
-	case "INVITE"
+	case "INVITE":
 		$target = $params[1];
 		$channel = $params[2];
 		send("JOIN", $channel);
