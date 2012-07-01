@@ -107,12 +107,10 @@ function user_set_ignored($nick, $ignore) {
 }
 
 function mysort ($a,$b) {
-	if (!isset($a)) { $a = 0; }
-	if (!isset($b)) { $b = 0; }
-	if ($a == $b) {
-		return 0;
-	}
-	return ($a < $b) ? -1 : 1;
+	if (!isset($a)) $a = 0;
+	if (!isset($b)) $b = 0;
+	return ($a == $b) ? 0 :
+		($a > $b) ? 1 : -1;
 }
 function gettop ($bottom = false) {
 	global $users;
