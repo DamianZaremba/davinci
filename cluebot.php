@@ -220,6 +220,8 @@ while (!feof($socket)) {
 					user_adj_points($source, -40, "Use of r, R, u, or U -40");
 				}
 			}
+		} elseif ($message == "\001VERSION\001") {
+			send("NOTICE", $source, "\001VERSION DaVinci by Cluenet\001");
 		} else {
 			send("NOTICE", $source, "?");
 		}
