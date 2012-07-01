@@ -54,16 +54,56 @@ function nicktolower($nick) {
 
 //
 
-function getpts($nick) {
-	$nick = nicktolower($nick);
+function user_get_points($nick) {
 	global $users;
+	$nick = nicktolower($nick);
 	return (int) $users[$nick]["points"];
 }
 
-function isadmin ($source) {
-	$nick = nicktolower($nick);
+function user_is_admin($source) {
 	global $users;
+	$nick = nicktolower($nick);
 	return (bool) $users[$nick]['admin'];
+}
+
+function user_get_stats($nick) {
+	global $users;
+	$nick = nicktolower($nick);
+	$tmp = "";
+	foreach ($users[$nick]["log"] as $reason => $count)
+		$tmp .= "$reason: $count. ";
+	return rstrip($tmp);
+}
+
+function user_adj_points($nick, $delta, $reason) {
+	global $users;
+	$nick = nicktolower($nick);
+	if ($users[$nick]["ignore"])
+		return;
+	$users[$nick]["points"] += $delta;
+	$users[$nick]["log"][$reason]++;
+	save_db();
+
+	if ($reason == "Administratively changed") {
+		$log = $users[$nick]["vlog"];
+	elseif ($delta > 0)
+		$log = $users[$nick]["verbose"];
+	else
+		$log = $users[$nick]["vdedo"];
+	if ($log)
+		send("NOTICE", $nick, "$reason ($pts points)");
+}
+
+function user_set_ignored($nick, $ignore) {
+	global $users;
+	$nick = nicktolower($nick);
+	$users[$nick]["ignore"] = $ignore;
+	$users[$nick]["points"] = 0;
+	$users[$nick]["log"] = array();
+	if ($ignore)
+		user_adj_points($nick, 0, "Ignored =0");
+	else
+		user_adj_points($nick, 0, "Unignored =0");
 }
 
 function mysort ($a,$b) {
@@ -73,21 +113,6 @@ function mysort ($a,$b) {
 		return 0;
 	}
 	return ($a < $b) ? -1 : 1;
-}
-function loguser ($source,$reason) {
-	global $users;
-	if ($users[$source]['vlog'] == true) {
-		global $socket;
-		fwrite($socket,'NOTICE '.$source.' :'.$reason.'.'."\n");
-	}
-	$users[$source]['log'][$reason]++;
-}
-function getstats ($source) {
-	global $users;
-	foreach ($users[$source]['log'] as $reason => $count) {
-		$tmp .= $reason.': '.$count.'.  ';
-	}
-	return $tmp;
 }
 function gettop ($bottom = false) {
 	global $users;
@@ -106,41 +131,6 @@ function gettop ($bottom = false) {
 	}
 	if ($bottom == true) { $tmp2 = array_reverse($tmp2,true); }
 	return $tmp2;
-}
-function setignore ($target,$status = true) {
-	global $users;
-	$users[$target]['ignore'] = $status;
-	$users[$target]['points'] = 0;
-	unset($users[$target]['log']);
-	if ($status == true) { loguser($target,'Ignored =0'); }
-	else { loguser($target,'Unignored =0'); }
-}
-function chgpts ($source,$delta) {
-	global $users;
-	if ($users[$source]['ignore'] == true) { return; }
-	if (($users[$source]['verbose'] == true) and ($users[$source]['vlog'] == false)) {
-		global $socket;
-		if ($delta > 0) {
-			$what = 'gained';
-		} else {
-			$what = 'lost';
-		}
-		if (($users[$source]['vdedo'] == false) or ($delta < 0)) {
-			fwrite($socket,'NOTICE '.$source.' :You have '.$what.' '.abs($delta).' points.'."\n");
-		}
-	}
-	$users[$source]['points'] += $delta;
-	if ($users[$source]['points'] <= -2000) {
-		global $target;
-		global $config;
-		global $socket;
-		if ($target != $config['nick']) {
-			fwrite($socket,'PRIVMSG '.$target.' :'.$source.' is not clueful!'."\n");
-			loguser($source,'User Warned +75');
-			chgpts($source,75);
-		}
-	}
-	save_db();
 }
 function mysqlconn ($user,$pass,$host,$port,$database) {
 	global $mysql;

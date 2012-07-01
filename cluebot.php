@@ -100,7 +100,7 @@ if (!$socket) {
 						break;
 					case 'points':
 						$who = $tmp0[1] ? $tmp0[1] : $source;
-						$pts = getpts($who);
+						$pts = user_get_points($who);
 						send("NOTICE", $source, "$who has $pts points.");
 						break;
 					case 'bottom':
@@ -113,15 +113,15 @@ if (!$socket) {
 						break;
 					case 'stats':
 						$who = $tmp0[1] ? $tmp0[1] : $source;
-						$stats = getstats($who);
+						$stats = user_get_stats($who);
 						send("NOTICE", $source, "$who's stats:");
 						send("NOTICE", $source, $stats);
 						break;
 					case 'unignore':
 						$ignore = false;
 					case 'ignore':
-						if (isadmin($source)) {
-							setignore($victim, $ignore);
+						if (user_is_admin($source)) {
+							user_set_ignored($victim, $ignore);
 							if ($ignore)
 								send("NOTICE", $source, "$victim is now ignored.");
 							else
@@ -131,7 +131,7 @@ if (!$socket) {
 						}
 						break;
 					case 'lock':
-						if (isadmin($source)) {
+						if (user_is_admin($source)) {
 							if ($locked)
 								$locked = false;
 								send("NOTICE", $source, "The database is now in read-write mode.");
@@ -144,7 +144,7 @@ if (!$socket) {
 						}
 						break;
 					case 'reload':
-						if (isadmin($source)) {
+						if (user_is_admin($source)) {
 							$users = get_db();
 							send("NOTICE", $source, "Internal database reloaded according to the MySQL database.");
 						} else {
@@ -152,18 +152,17 @@ if (!$socket) {
 						}
 						break;
 					case 'chgpts':
-						if (isadmin($source)) {
+						if (user_is_admin($source)) {
 							$victim = $tmp0[1];
-							$points = $tmp0[2];
-							loguser($victim, "Administratively changed");
-							chgpts($victim, $points);
+							$delta = $tmp0[2];
+							user_adj_points($victim, $delta, "Administratively changed");
 							send("NOTICE", $source, "Points of $victim changed.");
 						} else {
 							send("NOTICE", $source, "Access denied.");
 						}
 						break;
 					case 'reset':
-						if (isadmin($source)) {
+						if (user_is_admin($source)) {
 							$victim = $tmp0[1];
 							unset($users[$victim]);
 							send("NOTICE", $source, "User $victim reset.");
@@ -175,8 +174,8 @@ if (!$socket) {
 						$tmp0[1] = $source;
 					case 'whois':
 						$who = $tmp0[1];
-						$pts = getpts($who);
-						$stats = getstats($who);
+						$pts = user_get_points($who);
+						$stats = user_get_stats($who);
 
 						if ($pts < -1500)	$rating = 'Lamer';
 						elseif ($pts < -1000)	$rating = 'Not clueful';
@@ -191,14 +190,13 @@ if (!$socket) {
 
 						send("NOTICE", $source, "$who has $pts points and holds the rank of $rating.");
 						send("NOTICE", $source, "$who's stats: $stats");
-						if (isadmin($who))
+						if (user_is_admin($who))
 							send("NOTICE", $source, "$who is a DaVinci administrator.");
 						if ($users[$who]['ignore'])
 							send("NOTICE", $source, "$who is ignored by DaVinci.");
 						break;
 				}
 			} else {
-				$tmppts = 0;
 				$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
 				if ((!preg_match('/^'.$smilies.'$/i',$message))
 					and (!preg_match('/^(uh+|um+|uhm+|er+|ok|ah+|er+m+)(\.+)?$/i',$message))
@@ -207,25 +205,20 @@ if (!$socket) {
 					and (!preg_match('/(brb|bbl|lol|rofl|heh|wt[hf]|hah|lmao|bbiab|grr|hmm|hrm|http:|grep|\||vtun|ifconfig|\$|mm|gtg|wb)/i',$message))
 				) {
 					if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.|!|:|'.$smilies.')( '.$smilies.')?$/',$message)) {
-						loguser($source,'Normal sentence +1');
-						$tmppts++;
+						user_adj_points($source, +1, "Normal sentence +1");
 					} else {
-						loguser($source,'Abnormal sentence -1');
-						$tmppts--;
+						user_adj_points($source, -1, "Abnormal sentence -1");
 					}
 					if (preg_match('/^[^a-z]{8,}$/',$message)) {
-						loguser($source,'All caps -20');
-						$tmppts -= 20;
+						user_adj_points($source, -20, "All caps -20");
 					}
 					if (preg_match('/^[^aeiouy]*$/i',$message)) {
-						loguser($source,'No vowels -30');
+						user_adj_points($source, -30, "No vowels -30");
 						$tmppts -= 30;
 					}
 					if (preg_match('/(^| )[rRuU]( |$)/',$message)) {
-						loguser($source,'Use of r, R, u, or U -40');
-						$tmppts -= 40;
+						user_adj_points($source, -40, "Use of r, R, u, or U -40");
 					}
-					chgpts($source,$tmppts);
 				}
 			}
 		}
