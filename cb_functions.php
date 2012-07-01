@@ -4,25 +4,25 @@ function ircexplode($str) {
 	$str = rtrim($str, "\r\n");
 	$pos = strpos($str, " :");
 	if ($pos === false)
-		$last = null;
+		$trailing = null;
 	else {
-		$last = substr($str, $pos+2);
+		$trailing = substr($str, $pos+2);
 		$str = substr($str, 0, $pos);
 	}
-	$args = explode(" ", $str);
-	if ($last !== null)
-		$args[] = $last;
-	return $args;
+	$params = explode(" ", $str);
+	if ($trailing !== null)
+		$params[] = $trailing;
+	return $params;
 }
 
-function ircimplode($args) {
-	$last = array_pop($args);
-	if (strpos($last, " ") !== false
-	or strpos($last, ":") !== false) {
-		$last = ":".$last;
+function ircimplode($params) {
+	$trailing = array_pop($params);
+	if (strpos($trailing, " ") !== false
+	or strpos($trailing, ":") !== false) {
+		$trailing = ":".$trailing;
 	}
-	$args[] = $last;
-	$str = implode(" ", $args) . "\r\n";
+	$params[] = $trailing;
+	$str = implode(" ", $params) . "\r\n";
 	return $str;
 }
 
