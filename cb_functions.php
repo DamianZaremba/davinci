@@ -1,8 +1,71 @@
 <?PHP
-function getpts ($source) {
-	global $users;
-	return $users[$source]['points'];
+
+function ircexplode($str) {
+	$str = rtrim($str, "\r\n");
+	$pos = strpos($str, " :");
+	if ($pos === false)
+		$last = null;
+	else {
+		$last = substr($str, $pos+2);
+		$str = substr($str, 0, $pos);
+	}
+	$args = explode(" ", $str);
+	if ($last !== null)
+		$args[] = $last;
+	return $args;
 }
+
+function ircimplode($args) {
+	$last = array_pop($args);
+	if (strpos($last, " ") !== false
+	or strpos($last, ":") !== false) {
+		$last = ":".$last;
+	}
+	$args[] = $last;
+	$str = implode(" ", $args) . "\r\n";
+	return $str;
+}
+
+function prefixparse($prefix) {
+	$npos = $prefix[0] == ":" ? 1 : 0;
+	$upos = strpos($prefix, "!", $npos);
+	$hpos = strpos($prefix, "@", $upos);
+	if ($upos === false or $hpos === false) {
+		$nick = null;
+		$user = null;
+		$host = substr($prefix, $npos);
+	} else {
+		$nick = substr($prefix, $npos, $upos++-$npos);
+		$user = substr($prefix, $upos, $hpos++-$upos);
+		$host = substr($prefix, $hpos);
+	}
+	return array($nick, $user, $host);
+}
+
+function ischannel($target) {
+	return $target[0] == "#";
+}
+
+function nicktolower($nick) {
+	$nick = strtolower($nick);
+	$nick = strtr($nick, "[]\\", "{}|");
+	return $nick;
+}
+
+//
+
+function getpts($nick) {
+	$nick = nicktolower($nick);
+	global $users;
+	return (int) $users[$nick]["points"];
+}
+
+function isadmin ($source) {
+	$nick = nicktolower($nick);
+	global $users;
+	return (bool) $users[$nick]['admin'];
+}
+
 function mysort ($a,$b) {
 	if (!isset($a)) { $a = 0; }
 	if (!isset($b)) { $b = 0; }
@@ -43,10 +106,6 @@ function gettop ($bottom = false) {
 	}
 	if ($bottom == true) { $tmp2 = array_reverse($tmp2,true); }
 	return $tmp2;
-}
-function isadmin ($source) {
-	global $users;
-	return $users[$source]['admin'];
 }
 function setignore ($target,$status = true) {
 	global $users;
