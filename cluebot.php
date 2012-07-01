@@ -6,6 +6,7 @@ const RPL_WELCOME	= '001';
 const RPL_ISUPPORT	= '005';
 const RPL_ENDOFMOTD	= '376';
 const ERR_NOMOTD	= '422';
+const ERR_NICKNAMEINUSE	= '433';
 
 function send(/*@args*/) {
 	global $socket;
@@ -18,8 +19,8 @@ function send(/*@args*/) {
 function on_connect() {
 	global $config;
 
-	if (strlen($config["pass"]))
-		send($socket, "PASS", $config["pass"]);
+	if (strlen(@$config["irc_pass"]))
+		send("PASS", $config["irc_pass"]);
 
 	send("USER", $config["user"], "1", "1", $config["gecos"]);
 	send("NICK", $config["nick"]);
@@ -27,6 +28,10 @@ function on_connect() {
 
 function on_register() {
 	global $config;
+	global $mynick;
+
+	if (strlen($config["irc_mode"]))
+		send("MODE", $mynick, $config["irc_mode"]);
 
 	send("JOIN", implode(",", $config["channels"]));
 }
@@ -212,16 +217,20 @@ else
 	$uri = $config["server"];
 
 $socket = stream_socket_client($uri, $errno, $errstr, 30);
-
 if (!$socket) {
 	echo "$errstr ($errno)\n";
 	exit();
 }
 
+$mynick = $config["nick"];
+$nickctr = 0;
+
 on_connect();
 
 while (!feof($socket)) {
 	$line = fgets($socket);
+	if (!strlen($line))
+		continue;
 	$params = ircexplode($line);
 	if ($params[0][0] == ":")
 		$prefix = array_shift($params);
@@ -232,18 +241,25 @@ while (!feof($socket)) {
 	$cmd = strtoupper($params[0]);
 
 	switch ($cmd) {
-	case "PING":
-		send("PONG", $params[1]);
+	case RPL_WELCOME:
+		$mynick = $params[1];
 		break;
 	case RPL_ENDOFMOTD:
 	case ERR_NOMOTD:
 		on_register();
+		break;
+	case ERR_NICKNAMEINUSE:
+		$newnick = $config["nick"] . ++$nick_ctr;
+		send("NICK", $newnick);
 		break;
 	case "INVITE":
 		$target = $params[1];
 		$channel = $params[2];
 		send("JOIN", $channel);
 		send("PRIVMSG", $channel, "\001ACTION waves at $srcnick.\001");
+		break;
+	case "PING":
+		send("PONG", $params[1]);
 		break;
 	case "PRIVMSG":
 		$target = $params[1];
