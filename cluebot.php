@@ -186,18 +186,19 @@ function on_trigger($source, $target, $message) {
 		$pts = user_get_points($who);
 		$stats = user_get_stats($who);
 
-		if ($pts < -1500)	$rating = 'Lamer';
-		elseif ($pts < -1000)	$rating = 'Not clueful';
-		elseif ($pts < -500)	$rating = 'Needs alot of work';
-		elseif ($pts < -10)	$rating = 'Needs work';
-		elseif ($pts < 10)	$rating = 'Neutral';
-		elseif ($pts < 30)	$rating = 'Clueful';
-		elseif ($pts < 60)	$rating = 'Very clueful';
-		elseif ($pts < 100)	$rating = 'Extremely clueful';
-		elseif ($pts < 500)	$rating = 'Super clueful';
-		else			$rating = 'Clueful elite';
+		if     ($pts < -1500)	$rank = 'Lamer';
+		elseif ($pts < -1000)	$rank = 'Not clueful';
+		elseif ($pts <  -500)	$rank = 'Needs Work -- A Lot';
+		elseif ($pts <   -10)	$rank = 'Needs Work';
+		elseif ($pts <    10)	$rank = 'Neutral';
+		elseif ($pts <    50)	$rank = 'Clueful';
+		elseif ($pts <   200)	$rank = 'Very Clueful';
+		elseif ($pts <   500)	$rank = 'Extremely Clueful';
+		elseif ($pts <  1000)	$rank = 'Super Clueful';
+		elseif ($pts == 1337)	$rank = 'Clueful 3l33t';
+		else			$rank = 'Clueful Elite';
 
-		send("NOTICE", $srcnick, "$who has $pts points and holds the rank of $rating.");
+		send("NOTICE", $srcnick, "$who has $pts points and holds the rank of $rank.");
 		send("NOTICE", $srcnick, "$who's stats: $stats");
 		if (user_is_admin($who))
 			send("NOTICE", $srcnick, "$who is a DaVinci administrator.");
