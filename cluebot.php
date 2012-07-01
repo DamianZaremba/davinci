@@ -121,6 +121,11 @@ while (!feof($socket)) {
 					$ignore = false;
 				case 'ignore':
 					if (user_is_admin($source)) {
+						$victim = $tmp0[1];
+						if (!isset($victim)) {
+							send("NOTICE", $source, "Missing user argument.");
+							break;
+						}
 						user_set_ignored($victim, $ignore);
 						if ($ignore)
 							send("NOTICE", $source, "$victim is now ignored.");
@@ -155,6 +160,10 @@ while (!feof($socket)) {
 					if (user_is_admin($source)) {
 						$victim = $tmp0[1];
 						$delta = $tmp0[2];
+						if (!isset($victim) or !isset($delta)) {
+							send("NOTICE", $source, "Missing user argument.");
+							break;
+						}
 						user_adj_points($victim, $delta, "Administratively changed");
 						send("NOTICE", $source, "Points of $victim changed.");
 					} else {
@@ -164,6 +173,10 @@ while (!feof($socket)) {
 				case 'reset':
 					if (user_is_admin($source)) {
 						$victim = $tmp0[1];
+						if (!isset($victim)) {
+							send("NOTICE", $source, "Missing user argument.");
+							break;
+						}
 						unset($users[$victim]);
 						send("NOTICE", $source, "User $victim reset.");
 					} else {
@@ -174,6 +187,11 @@ while (!feof($socket)) {
 					$tmp0[1] = $source;
 				case 'whois':
 					$who = $tmp0[1];
+					if (!isset($who)) {
+						send("NOTICE", $source, "Missing user argument.");
+						break;
+					}
+
 					$pts = user_get_points($who);
 					$stats = user_get_stats($who);
 
