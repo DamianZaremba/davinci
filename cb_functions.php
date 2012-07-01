@@ -1,5 +1,17 @@
 <?PHP
 
+class User {
+	public $nick;
+	public $user;
+	public $host;
+
+	public __construct($nick, $user, $host) {
+		$this->nick = $nick;
+		$this->user = $user;
+		$this->host = $host;
+	}
+}
+
 function ircexplode($str) {
 	$str = rtrim($str, "\r\n");
 	$pos = strpos($str, " :");
@@ -39,7 +51,7 @@ function prefixparse($prefix) {
 		$user = substr($prefix, $upos, $hpos++-$upos);
 		$host = substr($prefix, $hpos);
 	}
-	return array($nick, $user, $host);
+	return new User($nick, $user, $host);
 }
 
 function ischannel($target) {
