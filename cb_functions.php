@@ -1,6 +1,6 @@
 <?PHP
 
-class User {
+class Nuh {
 	public $nick;
 	public $user;
 	public $host;
@@ -39,9 +39,13 @@ function ircimplode($params) {
 }
 
 function prefixparse($prefix) {
+	if ($prefix === null)
+		return new Nuh(null, null, null);
+
 	$npos = $prefix[0] == ":" ? 1 : 0;
 	$upos = strpos($prefix, "!", $npos);
 	$hpos = strpos($prefix, "@", $upos);
+
 	if ($upos === false or $hpos === false) {
 		$nick = null;
 		$user = null;
@@ -51,7 +55,8 @@ function prefixparse($prefix) {
 		$user = substr($prefix, $upos, $hpos++-$upos);
 		$host = substr($prefix, $hpos);
 	}
-	return new User($nick, $user, $host);
+
+	return new Nuh($nick, $user, $host);
 }
 
 function ischannel($target) {
@@ -66,16 +71,28 @@ function nicktolower($nick) {
 
 //
 
-function user_get_points($nick) {
-	global $users;
-	$nick = nicktolower($nick);
-	return (int) $users[$nick]["points"];
-}
-
 function user_is_admin($source) {
 	global $users;
 	$nick = nicktolower($nick);
 	return (bool) $users[$nick]['admin'];
+}
+
+function user_is_ignored($source) {
+	global $users;
+	$nick = nicktolower($nick);
+	return (bool) $users[$nick]['ignore'];
+}
+
+function user_set_ignored($nick, $ignore) {
+	global $users;
+	$nick = nicktolower($nick);
+	$users[$nick]["ignore"] = $ignore;
+	$users[$nick]["points"] = 0;
+	$users[$nick]["log"] = array();
+	if ($ignore)
+		user_adj_points($nick, 0, "Ignored =0");
+	else
+		user_adj_points($nick, 0, "Unignored =0");
 }
 
 function user_get_stats($nick) {
@@ -85,6 +102,12 @@ function user_get_stats($nick) {
 	foreach ($users[$nick]["log"] as $reason => $count)
 		$tmp .= "$reason: $count. ";
 	return rstrip($tmp);
+}
+
+function user_get_points($nick) {
+	global $users;
+	$nick = nicktolower($nick);
+	return (int) $users[$nick]["points"];
 }
 
 function user_adj_points($nick, $delta, $reason) {
@@ -106,16 +129,10 @@ function user_adj_points($nick, $delta, $reason) {
 		send("NOTICE", $nick, "$reason ($pts points)");
 }
 
-function user_set_ignored($nick, $ignore) {
+function user_reset_points($nick) {
 	global $users;
 	$nick = nicktolower($nick);
-	$users[$nick]["ignore"] = $ignore;
-	$users[$nick]["points"] = 0;
-	$users[$nick]["log"] = array();
-	if ($ignore)
-		user_adj_points($nick, 0, "Ignored =0");
-	else
-		user_adj_points($nick, 0, "Unignored =0");
+	unset($users[$nick]);
 }
 
 function mysort ($a,$b) {

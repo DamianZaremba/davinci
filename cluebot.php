@@ -156,7 +156,7 @@ function on_trigger($source, $target, $message) {
 				send("NOTICE", $srcnick, "Missing user argument.");
 				break;
 			}
-			unset($users[$victim]);
+			user_reset_points($victim);
 			send("NOTICE", $srcnick, "User $victim reset.");
 		} else {
 			send("NOTICE", $srcnick, "Access denied.");
@@ -189,7 +189,7 @@ function on_trigger($source, $target, $message) {
 		send("NOTICE", $srcnick, "$who's stats: $stats");
 		if (user_is_admin($who))
 			send("NOTICE", $srcnick, "$who is a DaVinci administrator.");
-		if ($users[$who]['ignore'])
+		if (user_is_ignored($who))
 			send("NOTICE", $srcnick, "$who is ignored by DaVinci.");
 		break;
 	}
@@ -211,13 +211,11 @@ on_connect();
 while (!feof($socket)) {
 	$line = fgets($socket);
 	$params = ircexplode($line);
-	if ($params[0][0] == ":") {
+	if ($params[0][0] == ":")
 		$prefix = array_shift($params);
-		$source = prefixparse($prefix);
-	} else {
+	else
 		$prefix = null;
-		$source = new User(null, null, null);
-	}
+	$source = prefixparse($prefix);
 	$cmd = strtoupper($params[0]);
 
 	switch ($cmd) {
