@@ -50,8 +50,6 @@ while (!feof($socket)) {
 		$source = $nick;
 		$target = $tmp[1];
 		$message = $tmp[2];
-		if (!ischannel($target))
-			break;
 		if ($message[0] == $config["trigger"]) {
 			$tmp0 = explode(' ',$message);
 			$cmd = strtolower(substr($tmp0[0],1));
@@ -134,7 +132,7 @@ while (!feof($socket)) {
 					break;
 				case 'lock':
 					if (user_is_admin($source)) {
-						if ($locked)
+						if ($locked) {
 							$locked = false;
 							send("NOTICE", $source, "The database is now in read-write mode.");
 						} else {
@@ -198,7 +196,7 @@ while (!feof($socket)) {
 						send("NOTICE", $source, "$who is ignored by DaVinci.");
 					break;
 			}
-		} else {
+		} elseif (ischannel($target)) {
 			$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
 			if ((!preg_match('/^'.$smilies.'$/i',$message))
 				and (!preg_match('/^(uh+|um+|uhm+|er+|ok|ah+|er+m+)(\.+)?$/i',$message))
@@ -222,6 +220,8 @@ while (!feof($socket)) {
 					user_adj_points($source, -40, "Use of r, R, u, or U -40");
 				}
 			}
+		} else {
+			send("NOTICE", $source, "?");
 		}
 	}
 }
