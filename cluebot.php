@@ -8,19 +8,26 @@ const RPL_ENDOFMOTD	= '376';
 const ERR_NOMOTD	= '422';
 
 function send(/*@args*/) {
+	global $socket;
+
 	$args = func_get_args();
 	$str = ircimplode($args);
-
-	global $socket;
 	return fwrite($socket, $str);
 }
 
 function on_connect() {
+	global $config;
+
+	if (strlen($config["pass"]))
+		send($socket, "PASS", $config["pass"]);
+
 	send($socket, "USER", $config["user"], "1", "1", $config["gecos"]);
 	send($socket, "NICK", $config["nick"]);
 }
 
 function on_register() {
+	global $config;
+
 	send("JOIN", implode(",", $config["channels"]));
 }
 
@@ -199,7 +206,12 @@ function on_trigger($source, $target, $message) {
 $locked = false;
 $users = get_db();
 
-$socket = stream_socket_client('tcp://'.$config['server'].':'.$config['port'],$errno,$errstr,30);
+if (strpos($config["server"], "://") === false)
+	$uri = "tcp://{$config["server"]}:{$config["port"]}";
+else
+	$uri = $config["server"];
+
+$socket = stream_socket_client($uri, $errno, $errstr, 30);
 
 if (!$socket) {
 	echo "$errstr ($errno)\n";
