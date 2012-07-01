@@ -1,6 +1,6 @@
 <?PHP
 
-class Nuh {
+class Prefix {
 	public $nick;
 	public $user;
 	public $host;
@@ -40,7 +40,7 @@ function ircimplode($params) {
 
 function prefixparse($prefix) {
 	if ($prefix === null)
-		return new Nuh(null, null, null);
+		return new Prefix(null, null, null);
 
 	$npos = $prefix[0] == ":" ? 1 : 0;
 	$upos = strpos($prefix, "!", $npos);
@@ -56,7 +56,7 @@ function prefixparse($prefix) {
 		$host = substr($prefix, $hpos);
 	}
 
-	return new Nuh($nick, $user, $host);
+	return new Prefix($nick, $user, $host);
 }
 
 function ischannel($target) {

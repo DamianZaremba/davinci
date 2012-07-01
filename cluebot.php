@@ -230,7 +230,9 @@ while (!feof($socket)) {
 		$srcnick = $source->nick;
 		$target = $params[1];
 		$message = $params[2];
-		if ($message[0] == $config["trigger"]) {
+		if ($message == "\001VERSION\001") {
+			send("NOTICE", $srcnick, "\001VERSION DaVinci by Cluenet\001");
+		} elseif ($message[0] == $config["trigger"]) {
 			on_trigger($source, $target, $message);
 		} elseif (ischannel($target)) {
 			$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
@@ -255,8 +257,6 @@ while (!feof($socket)) {
 					user_adj_points($srcnick, -40, "Use of r, R, u, or U -40");
 				}
 			}
-		} elseif ($message == "\001VERSION\001") {
-			send("NOTICE", $srcnick, "\001VERSION DaVinci by Cluenet\001");
 		} else {
 			send("NOTICE", $srcnick, "?");
 		}
