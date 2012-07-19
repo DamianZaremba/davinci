@@ -71,7 +71,7 @@ function nicktolower($nick) {
 
 //
 
-function user_is_admin($source) {
+function user_is_admin($nick) {
 	global $users;
 	$nick = nicktolower($nick);
 	return (bool) $users[$nick]['admin'];
