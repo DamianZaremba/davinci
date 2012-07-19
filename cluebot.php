@@ -30,7 +30,7 @@ function on_register() {
 	global $config;
 	global $mynick;
 
-	if (strlen($config["irc_mode"]))
+	if (strlen(@$config["irc_mode"]))
 		send("MODE", $mynick, $config["irc_mode"]);
 
 	send("JOIN", implode(",", $config["channels"]));
