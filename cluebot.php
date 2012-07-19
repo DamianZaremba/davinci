@@ -161,6 +161,21 @@ function on_trigger($source, $target, $message) {
 			send("NOTICE", $srcnick, "Access denied.");
 		}
 		break;
+	case 'merge':
+		if (user_is_admin($srcnick)) {
+			$old_user = $args[1];
+			$new_user = $args[2];
+			if (!isset($old_user) || !isset($new_user)) {
+				send("NOTICE", $srcnick, "Usage: .merge old_user new_user");
+				break;
+			}
+			user_merge($old_user, $new_user);
+			send("NOTICE", $srcnick, "Merged $old_user into $new_user");
+			break;
+		} else {
+			send("NOTICE", $srcnick, "Access denies.");
+		}
+		break;
 	case 'chgpts':
 		if (user_is_admin($srcnick)) {
 			$victim = $args[1];
