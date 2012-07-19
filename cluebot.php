@@ -241,26 +241,37 @@ function on_trigger($source, $target, $message) {
 
 function rate_message($nick, $message) {
 	$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
-	if ((!preg_match('/^'.$smilies.'$/i',$message))
-		and (!preg_match('/^(uh+|um+|uhm+|er+|ok|ah+|er+m+)(\.+)?$/i',$message))
-		and (!preg_match('/^[^A-Za-z].*$/',$message))
-		and (!preg_match('/^s(.).+\1.+\1i?g?$/',$message))
-		and (!preg_match('/(brb|bbl|lol|rofl|heh|wt[hf]|hah|lmao|bbiab|grr|hmm|hrm|http:|grep|\||vtun|ifconfig|\$|mm|gtg|wb)/i',$message))
+
+	if (preg_match('/^'.$smilies.'$/i', $message)
+	or preg_match('/^(um+|uh+m*|er+m*|ah+|ok)\.*$/i', $message)
+	or preg_match('/^(brb|bbl|lol|rot?fl|heh|wt[fh]|haha?|lmf?ao|bbiab|grr+|hr?m+|gtg|wb)/i')
+	or preg_match('!(http|ftp)s?://!')
+	or preg_match('/^[a-z]/i', $message)
 	) {
-		if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.|!|:|'.$smilies.')( '.$smilies.')?$/',$message)) {
-			user_adj_points($nick, +1, "Normal sentence +1");
-		} else {
-			user_adj_points($nick, -1, "Abnormal sentence -1");
-		}
-		if (preg_match('/^[^a-z]{8,}$/',$message)) {
-			user_adj_points($nick, -20, "All caps -20");
-		}
-		if (preg_match('/^[^aeiouy]*$/i',$message)) {
-			user_adj_points($nick, -30, "No vowels -30");
-		}
-		if (preg_match('/(^| )[rRuU]( |$)/',$message)) {
-			user_adj_points($nick, -40, "Use of r, R, u, or U -40");
-		}
+		return;
+	}
+
+	if (preg_match('/(^| )[ru]( |$)/i', $message)) {
+		user_adj_points($nick, -40, "Use of r, R, u, or U -40");
+	}
+
+	if (!preg_match('/[aeiouy]/i', $message)) {
+		user_adj_points($nick, -30, "No vowels -30");
+	}
+
+	if (preg_match('/\b(crap|cunt|fuck|shit)\b/i', $message)) {
+		user_adj_points($nick, -20, "Use of uncreative profanity -20");
+	}
+
+	if (preg_match('/^[^a-z]{8,}$/', $message)) {
+		user_adj_points($nick, -20, "All caps -20");
+	}
+
+	// Shit, I have no idea what this does. Let's assume it works.
+	if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.|!|:|'.$smilies.')( '.$smilies.')?$/', $message)) {
+		user_adj_points($nick, +1, "Normal sentence +1");
+	} else {
+		user_adj_points($nick, -1, "Abnormal sentence -1");
 	}
 }
 
