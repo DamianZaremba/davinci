@@ -77,6 +77,13 @@ function user_is_admin($source) {
 	return (bool) $users[$nick]['admin'];
 }
 
+function user_make_admin($nick) {
+	global $users;
+	$nick = nicktolower($nick);
+	$users[$nick]['admin'] = true;
+	save_db();
+}
+
 function user_is_ignored($source) {
 	global $users;
 	$nick = nicktolower($nick);
