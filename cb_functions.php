@@ -134,7 +134,7 @@ function user_adj_points($nick, $delta, $reason) {
 	else
 		$log = $users[$nick]["vdedo"];
 	if ($log)
-		send("NOTICE", $nick, "$reason ($pts points)");
+		send("NOTICE", $nick, "$reason ($delta points)");
 }
 
 function user_reset_points($nick) {
