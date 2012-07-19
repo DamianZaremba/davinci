@@ -142,6 +142,17 @@ function user_reset_points($nick) {
 	unset($users[$nick]);
 }
 
+function user_merge($old_user, $new_user) {
+	global $users;
+	$old_user = nicktolower($old_user);
+	$new_user = nicktolower($new_user);
+
+	$old_points = user_get_points($old_user);
+	user_adj_points($new_user, $old_points, "Merged with $old_user");
+	user_reset_points($old_user);
+	save_db();
+}
+
 function mysort ($a,$b) {
 	if (!isset($a)) $a = 0;
 	if (!isset($b)) $b = 0;
