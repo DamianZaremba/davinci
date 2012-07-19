@@ -240,7 +240,8 @@ function on_trigger($source, $target, $message) {
 }
 
 function rate_message($nick, $message) {
-	$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
+	$smilies  = '((>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
+	$smilies .= '|(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)(-|\')?(:|;|8)(>|\})?)';
 
 	if (preg_match('/^'.$smilies.'$/i', $message)
 	or preg_match('/^(um+|uh+m*|er+m*|ah+|ok)\.*$/i', $message)
@@ -267,11 +268,29 @@ function rate_message($nick, $message) {
 		user_adj_points($nick, -20, "All caps -20");
 	}
 
+	if (preg_match('/(^| )i( |$)/',$message)) {
+		user_adj_points($srcnick, -5, "Lower-case personal pronoun -5");
+	}
+
+	if (preg_match('/\<censored\>/',$message)) {
+		user_adj_points($srcnick, -20, "Use of profanity -20");
+	}
+
+	if (preg_match('/(^| )lawl( |$)/',$message)) {
+		user_adj_points($srcnick, -20, "Use of non-clueful variation of \"lol\" -20");
+	}
+
+	if (preg_match('/(^| )rawr( |$)/',$message)) {
+		user_adj_points($srcnick, -20, "Use of non-clueful expression -20");
+	}
+
 	// Shit, I have no idea what this does. Let's assume it works.
-	if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.|!|:|'.$smilies.')( '.$smilies.')?$/', $message)) {
-		user_adj_points($nick, +1, "Normal sentence +1");
+	if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.(`|\'|")?|!|:|'.$smilies.')( '.$smilies.')?$/',$message)) {
+		user_adj_points($srcnick, +2, "Clueful sentence +2");
+	} elseif (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*$/',$message)) {
+		user_adj_points($srcnick, +1, "Normal sentence +1");
 	} else {
-		user_adj_points($nick, -1, "Abnormal sentence -1");
+		user_adj_points($srcnick, -1, "Abnormal sentence -1");
 	}
 }
 
@@ -337,7 +356,11 @@ while (!feof($socket)) {
 		} elseif ($message[0] == $config["trigger"]) {
 			on_trigger($source, $target, $message);
 		} elseif (ischannel($target)) {
+<<<<<<< HEAD
 			rate_message($srcnick, $message);
+=======
+	
+>>>>>>> Restore old point calculations
 		} else {
 			send("NOTICE", $srcnick, "?");
 		}
