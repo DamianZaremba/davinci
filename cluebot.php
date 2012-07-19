@@ -139,6 +139,20 @@ function on_trigger($source, $target, $message) {
 			send("NOTICE", $srcnick, "Access denied.");
 		}
 		break;
+    case 'makeadmin':
+        if (user_is_admin($srcnick)) {
+            $victim = $args[1];
+            if (!isset($victim)) {
+                send("NOTICE", $srcnick, "Missing user argument.");
+                break;
+            }
+            user_make_admin($victim);
+            send("NOTICE", $srcnick, "$victim is now an admin.");
+            send("NOTICE", $victim, "$srcnick just made you an admin.");
+        } else {
+            send("NOTICE", $srcnick, "Access denied.");
+        }
+        break;
 	case 'reload':
 		if (user_is_admin($srcnick)) {
 			$users = get_db();
