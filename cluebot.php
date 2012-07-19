@@ -260,7 +260,7 @@ function rate_message($nick, $message) {
 		user_adj_points($nick, -30, "No vowels -30");
 	}
 
-	if (preg_match('/\b(crap|cunt|fuck|shit)\b/i', $message)) {
+	if (preg_match('/\b(cunt|fuck)\b/i', $message)) {
 		user_adj_points($nick, -20, "Use of uncreative profanity -20");
 	}
 
