@@ -1,4 +1,5 @@
-<?PHP
+<?php
+// vim: noet
 
 class Prefix {
 	public $nick;

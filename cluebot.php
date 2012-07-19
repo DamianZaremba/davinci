@@ -1,4 +1,6 @@
-<?PHP
+<?php
+// vim: noet
+
 include 'cb_config.php';
 include 'cb_functions.php';
 
