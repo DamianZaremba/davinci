@@ -239,6 +239,31 @@ function on_trigger($source, $target, $message) {
 	}
 }
 
+function rate_message($nick, $message) {
+	$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
+	if ((!preg_match('/^'.$smilies.'$/i',$message))
+		and (!preg_match('/^(uh+|um+|uhm+|er+|ok|ah+|er+m+)(\.+)?$/i',$message))
+		and (!preg_match('/^[^A-Za-z].*$/',$message))
+		and (!preg_match('/^s(.).+\1.+\1i?g?$/',$message))
+		and (!preg_match('/(brb|bbl|lol|rofl|heh|wt[hf]|hah|lmao|bbiab|grr|hmm|hrm|http:|grep|\||vtun|ifconfig|\$|mm|gtg|wb)/i',$message))
+	) {
+		if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.|!|:|'.$smilies.')( '.$smilies.')?$/',$message)) {
+			user_adj_points($nick, +1, "Normal sentence +1");
+		} else {
+			user_adj_points($nick, -1, "Abnormal sentence -1");
+		}
+		if (preg_match('/^[^a-z]{8,}$/',$message)) {
+			user_adj_points($nick, -20, "All caps -20");
+		}
+		if (preg_match('/^[^aeiouy]*$/i',$message)) {
+			user_adj_points($nick, -30, "No vowels -30");
+		}
+		if (preg_match('/(^| )[rRuU]( |$)/',$message)) {
+			user_adj_points($nick, -40, "Use of r, R, u, or U -40");
+		}
+	}
+}
+
 //mysqlconn($config['mysqluser'],$config['mysqlpass'],$config['mysqlhost'],$config['mysqlport'],$config['mysqldb']);
 $locked = false;
 $users = get_db();
@@ -301,28 +326,7 @@ while (!feof($socket)) {
 		} elseif ($message[0] == $config["trigger"]) {
 			on_trigger($source, $target, $message);
 		} elseif (ischannel($target)) {
-			$smilies = '(>|\})?(:|;|8)(-|\')?(\)|[Dd]|[Pp]|\(|[Oo]|[Xx]|\\|\/)';
-			if ((!preg_match('/^'.$smilies.'$/i',$message))
-				and (!preg_match('/^(uh+|um+|uhm+|er+|ok|ah+|er+m+)(\.+)?$/i',$message))
-				and (!preg_match('/^[^A-Za-z].*$/',$message))
-				and (!preg_match('/^s(.).+\1.+\1i?g?$/',$message))
-				and (!preg_match('/(brb|bbl|lol|rofl|heh|wt[hf]|hah|lmao|bbiab|grr|hmm|hrm|http:|grep|\||vtun|ifconfig|\$|mm|gtg|wb)/i',$message))
-			) {
-				if (preg_match('/^([^ ]+(:|,| -) .|[^a-z]).*(\?|\.|!|:|'.$smilies.')( '.$smilies.')?$/',$message)) {
-					user_adj_points($srcnick, +1, "Normal sentence +1");
-				} else {
-					user_adj_points($srcnick, -1, "Abnormal sentence -1");
-				}
-				if (preg_match('/^[^a-z]{8,}$/',$message)) {
-					user_adj_points($srcnick, -20, "All caps -20");
-				}
-				if (preg_match('/^[^aeiouy]*$/i',$message)) {
-					user_adj_points($srcnick, -30, "No vowels -30");
-				}
-				if (preg_match('/(^| )[rRuU]( |$)/',$message)) {
-					user_adj_points($srcnick, -40, "Use of r, R, u, or U -40");
-				}
-			}
+			rate_message($srcnick, $message);
 		} else {
 			send("NOTICE", $srcnick, "?");
 		}
