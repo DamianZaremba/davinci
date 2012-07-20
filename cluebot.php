@@ -293,6 +293,7 @@ function rate_message($nick, $message) {
 //mysqlconn($config['mysqluser'],$config['mysqlpass'],$config['mysqlhost'],$config['mysqlport'],$config['mysqldb']);
 $locked = false;
 $users = get_db();
+$git_hash = system('git --git-dir="' . __DIR__ . '/.git" rev-parse --verify HEAD');
 
 if (strpos($config["server"], "://") === false)
 	$uri = "tcp://{$config["server"]}:{$config["port"]}";
@@ -348,7 +349,7 @@ while (!feof($socket)) {
 		$target = $params[1];
 		$message = $params[2];
 		if ($message == "\001VERSION\001") {
-			send("NOTICE", $srcnick, "\001VERSION DaVinci by Cluenet\001");
+			send("NOTICE", $srcnick, "\001VERSION DaVinci by Cluenet (HEAD is " . $git_hash . "\001");
 		} elseif ($message[0] == $config["trigger"]) {
 			on_trigger($source, $target, $message);
 		} elseif (ischannel($target)) {
