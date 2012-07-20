@@ -247,7 +247,7 @@ function rate_message($nick, $message) {
 	or preg_match('/^(um+|uh+m*|er+m*|ah+|ok)\.*$/i', $message)
 	or preg_match('/^(brb|bbl|lol|rot?fl|heh|wt[fh]|haha?|lmf?ao|bbiab|grr+|hr?m+|gtg|wb)/i')
 	or preg_match('!(http|ftp)s?://!')
-	or preg_match('/^[a-z]/i', $message)
+	or preg_match('/^[^a-z]/i', $message)
 	) {
 		return;
 	}
