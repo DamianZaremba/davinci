@@ -293,7 +293,7 @@ function rate_message($nick, $message) {
 //mysqlconn($config['mysqluser'],$config['mysqlpass'],$config['mysqlhost'],$config['mysqlport'],$config['mysqldb']);
 $locked = false;
 $users = get_db();
-$git_hash = system('git --work-tree="' . __DIR__ . '" rev-parse --verify HEAD');
+$git_hash = system('git --git-dir="' . __DIR__ . '/.git" rev-parse --verify HEAD');
 
 if (strpos($config["server"], "://") === false)
 	$uri = "tcp://{$config["server"]}:{$config["port"]}";
