@@ -349,7 +349,7 @@ while (!feof($socket)) {
 		$target = $params[1];
 		$message = $params[2];
 		if ($message == "\001VERSION\001") {
-			send("NOTICE", $srcnick, "\001VERSION DaVinci by Cluenet (HEAD is " . $git_hash . "\001");
+			send("NOTICE", $srcnick, "\001VERSION DaVinci by Cluenet (HEAD is " . $git_hash . ")\001");
 		} elseif ($message[0] == $config["trigger"]) {
 			on_trigger($source, $target, $message);
 		} elseif (ischannel($target)) {
