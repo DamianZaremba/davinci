@@ -160,6 +160,7 @@ function mysort ($a,$b) {
 	return ($a == $b) ? 0 :
 		($a > $b) ? 1 : -1;
 }
+
 function gettop ($bottom = false) {
 	global $users;
 	foreach ($users as $nick => $data) {
@@ -178,6 +179,7 @@ function gettop ($bottom = false) {
 	if ($bottom == true) { $tmp2 = array_reverse($tmp2,true); }
 	return $tmp2;
 }
+
 function mysqlconn ($user,$pass,$host,$port,$database) {
 	global $mysql;
 	$mysql = mysql_connect($host.':'.$port,$user,$pass);
@@ -188,6 +190,7 @@ function mysqlconn ($user,$pass,$host,$port,$database) {
 		die('Can not access database!');
 	}
 }	
+
 function get_db () {
 	$ret = unserialize(file_get_contents('cb_users.db'));
 //	global $mysql;
@@ -206,6 +209,7 @@ function get_db () {
 //	}
 	return $ret;
 }
+
 function save_db () {
 	global $users;
 //	global $mysql;
