@@ -234,4 +234,68 @@ function save_db() {
 //		mysql_query($query);
 //	}
 }
+
+function get_full_entry($nick, $entry) {
+	return $nick .
+		':' . $entry['points'] .
+		':' . $entry['ignore'] .
+		':' . $entry['admin'] .
+		':' . $entry['verbose'] .
+		':' . $entry['vdedo'] .
+		':' . $entry['vlog'] .
+		':' . $entry['creation'] .
+		':' . $entry['log']['Normal sentence +1'] .
+		':' . $entry['log']['Abnormal sentence -1'] .
+		':' . $entry['log']['No vowels -30'] .
+		':' . $entry['log']['Use of r, R, u, or U -40'] .
+		':' . $entry['log']['Administratively changed'] .
+		':' . $entry['log']['Clueful sentence +2'] .
+		':' . $entry['log']['All caps -20'] .
+		':' . $entry['log']['Use of r, R, u, or U -40'] .
+		':' . $entry['log']['Lower-case personal pronoun -5'] .
+		':' . $entry['log']['Use of profanity -20'] .
+		':' . $entry['log']['Use of non-printable ascii characters -5'] .
+		"\n";
+}
+
+function api_handle_print($nick, $what, $entry) {
+	switch($what) {
+		case 'full':
+			return get_full_entry($nick, $entry);
+
+		case 'points':
+			return $nick . ":" . user_get_points($nick) . "\n";
+
+		case 'shortpoints':
+			return user_get_points($nick) . "\n";
+
+		case 'header':
+			return 'Nick:Points:IgnoreFlag:AdminFlag:VerboseSetting:' . 
+					'VDeductionsSetting:VLogSetting:FirstSeenTime:' .
+					'NormalSentences:AbnormalSentences:NoVowels:' .
+					'OLDLameAbbreviations:AdministrativelyChanged:' . 
+					'CluefulSentences:AllCaps:LameAbbreviations:' .
+					'LowercaseI:Profanity:NonprintableASCII' . "\n";
+
+		case 'usage':
+			return "Usage:\n"
+				. "  cluebot dump [Nick1,Nick2,...]\n"
+				. "  cluebot points [Nick1,Nick2,...]\n"
+				. "  cluebot shortpoints <Nick>\n"
+				. "  cluebot dumpheader\n";
+	}
+}
+
+function api_return_entries($sock, $what, $nicks=Null) {
+	$data = get_db();
+
+	if($nicks == NULL)
+		foreach($data as $nick => $entry)
+			fwrite($sock, api_handle_print($nick, $what, $entry));
+	elseif(is_array($nicks))
+		foreach($nicks as $nick)
+			fwrite($sock, api_handle_print($nick, $what, $data[strtolower($nick)]));
+	else
+		api_return_entries($sock, $what, explode(',', $nicks));
+}
 ?>
