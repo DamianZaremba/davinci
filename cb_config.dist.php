@@ -12,7 +12,7 @@ $config = array (
 		'mysqlport' => 3306,
 		'mysqluser' => '',
 		'mysqlpass' => '',
-		'mysqldb' => 'cluebot'
+		'mysqldb' => 'cluebot',
 		'pointsserver' => 'tcp://0.0.0.0:58945',
 	);
 ?>
