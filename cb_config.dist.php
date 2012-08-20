@@ -1,6 +1,5 @@
 <?php
-$config = Array
-	(
+$config = array (
 		'server' => "tcp://localhost:6667",
 		'nick' => 'DaVinci',
 		'user' => 'ClueBot',
@@ -14,5 +13,6 @@ $config = Array
 		'mysqluser' => '',
 		'mysqlpass' => '',
 		'mysqldb' => 'cluebot'
+		'pointsserver' => 'tcp://0.0.0.0:58945',
 	);
 ?>
