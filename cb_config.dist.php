@@ -1,4 +1,4 @@
-<?PHP
+<?php
 $config = Array
 	(
 		'server' => "tcp://localhost:6667",
